@@ -1,0 +1,32 @@
+---
+## LV dédié  ##
+- name: "Adding {{ es_lv_name }}"
+  become: yes
+  lvol:
+    vg="{{ es_vg_name }}"
+    lv={{ es_lv_name }}
+    size="{{ es_lvsize }}"
+    state=present
+
+- name: "Install xfsprogs to support XFS FS"
+  become: yes
+  apt:
+    name="xfsprogs"
+    state=present
+    update_cache=true
+  when: es_fs_type == "xfs"
+
+- name: "Creating FS for /dev/mapper/{{ es_vg_name }}-{{ es_lv_name }}"
+  become: yes
+  filesystem:
+    fstype={{ es_fs_type }}
+    dev=/dev/mapper/{{ es_vg_name }}-{{ es_lv_name }}
+
+- name: "Mounting data dir"
+  become: yes
+  mount:
+    src=/dev/mapper/{{ es_vg_name }}-{{ es_lv_name }}
+    name={{ es_data_dir }}
+    fstype={{ es_fs_type }}
+    opts=defaults,noatime,noexec
+    state=mounted

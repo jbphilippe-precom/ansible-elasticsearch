@@ -1,0 +1,10 @@
+---
+- name: "Is ElasticSearch listening port {{ es_http_port }} ?"
+  wait_for: port={{ es_http_port }}
+            delay=5
+            timeout=30
+
+- name: "Is ElasticSearch listening port {{ es_transport_tcp_port }} ?"
+  wait_for: port={{ es_transport_tcp_port }}
+            delay=5
+            timeout=30

@@ -1,0 +1,29 @@
+---
+
+## Pre requis ##
+- name: "Install python-apt (dependency for Ansible apt_repository)"
+  become: yes
+  apt:
+    name="python-apt"
+    state=present
+    update_cache=true
+
+- name: "Retrieve and install apt key"
+  become: yes
+  apt_key:
+    url="{{ es_apt_key }}"
+    state=present
+
+- name: "Add repository for ES 2.X"
+  become: yes
+  apt_repository:
+    repo='{{ es_apt_repo2 }}'
+    state=present
+  when: es_version|version_compare("5.0.0",'<')
+
+- name: "Add repository for ES 5.X"
+  become: yes
+  apt_repository:
+    repo='{{ es_apt_repo5 }}'
+    state=present
+  when: es_version|version_compare("5.0.0",'>=')

@@ -1,0 +1,23 @@
+---
+# tasks file for ansible-elasticsearch
+
+## INSTALLATION ##
+- include: elasticsearch_install.yml
+  when:
+    ansible_distribution == 'Ubuntu'
+    and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [installation]
+
+## ROLLBACK ##
+- include: elasticsearch_rollback.yml
+  when:
+    ansible_distribution == 'Ubuntu'
+    and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [rollback]
+
+## TESTING ##
+- include: elasticsearch_testing.yml
+  when:
+    ansible_distribution == 'Ubuntu'
+    and (ansible_distribution_release == 'trusty' or ansible_distribution_release == 'xenial')
+  tags: [testing]

@@ -1,0 +1,23 @@
+---
+- hosts: r1x02
+  roles:
+     - tests/ansible-java
+     - ../ansible-elasticsearch
+  vars:
+    es_version: "5.4.0"
+    es_apt_repo: "deb http://mirror.services.local/elasticsearch_5.x/ stable main"
+    java_version: 8
+    install_jdk: 1
+    install_jre: 0
+    install_openjdk: 0
+    es_lv_create: yes
+    es_lvsize: "2G"
+    es_cluster_name: "moncluster"
+    es_localhost_only: 1
+    es_heap_size: "2G"
+    es_max_locked_memory: "unlimited"
+    es_cluster_group: "r1x02"
+    #es_prod_interface: "eth0"
+    es_firewall: yes
+    es_unicast_hostlist:
+      - "192.168.11.69"

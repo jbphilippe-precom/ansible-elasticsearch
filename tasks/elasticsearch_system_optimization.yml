@@ -1,0 +1,67 @@
+---
+# tasks file for ansible-elasticsearch-2.0-system-optimization
+
+- name: "Swappiness"
+  become: yes
+  sysctl:
+    name=vm.swappiness
+    value=1
+    state=present
+  notify: restart es
+
+- name: "Increase open file soft limit"
+  become: yes
+  pam_limits:
+    domain=elasticsearch
+    limit_type=soft
+    limit_item=nofile
+    value=64000
+  notify: restart es
+
+- name: "Increase open file hard limit"
+  become: yes
+  pam_limits:
+    domain=elasticsearch
+    limit_type=hard
+    limit_item=nofile
+    value=64000
+  notify: restart es
+
+- name: "memlock soft unlimited"
+  become: yes
+  pam_limits:
+    domain=elasticsearch
+    limit_type=soft
+    limit_item=memlock
+    value=unlimited
+  notify: restart es
+
+- name: "memlock hard unlimited"
+  become: yes
+  pam_limits:
+    domain=elasticsearch
+    limit_type=hard
+    limit_item=memlock
+    value=unlimited
+  notify: restart es
+
+- name: "Change max_map_count to 262144"
+  become: yes
+  sysctl:
+    name="vm.max_map_count"
+    value=262144
+    sysctl_set=yes
+    state=present
+    reload=yes
+  notify: restart es
+
+- name: "Change vfs_cache_pressure"
+  become: yes
+  sysctl:
+    name="vm.vfs_cache_pressure"
+    value={{ es_vm_vfs_cache_pressure }}
+    sysctl_set=yes
+    state=present
+    reload=yes
+  when: es_vm_vfs_cache_pressure is defined
+  notify: restart es

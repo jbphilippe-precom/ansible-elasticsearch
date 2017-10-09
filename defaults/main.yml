@@ -1,0 +1,50 @@
+---
+# defaults file for ansible-elasticsearch
+es_version: "5.4.0"
+es_apt_key: "http://mirror.services.local/pubkey/ael.scs.systeme.key"
+es_apt_repo5: "deb http://mirror.services.local/elasticsearch_5.x/ stable main"
+es_apt_repo2: "deb http://mirror.services.local/elasticsearch_2.x/ stable main"
+es_vg_name: "vg_vroot"
+es_lv_name: "lv_elasticsearch"
+es_lvsize: "5G"
+
+es_cluster_group: "all"
+es_prod_interface: "eth0"
+es_allowed_client_list_ip: ""
+es_conf_dir: "/etc/{{ es_service_name }}/"
+es_config_template_file: "elasticsearch_yaml.tpl"
+es_default_config_template_file: "elasticsearch_default.tpl"
+es_logging_template_file: "logging.yml.tpl"
+es_heap_size: "2G"
+es_max_locked_memory: "unlimited"
+es_firewall: yes
+es_lv_create: yes
+es_old_lock_memory: 0
+es_username: "elasticsearch"
+es_groupname: "elasticsearch"
+es_fs_type: "ext4"
+es_cluster_name: "elasticsearch"
+es_http_port: 9200
+es_transport_tcp_port: 9300
+
+es_service_name: "elasticsearch"
+es_pid_dir: "/var/run/{{ es_service_name }}/"
+es_data_dir: "/var/lib/{{ es_service_name }}/"
+es_log_dir: "/var/log/{{ es_service_name }}/"
+es_path_data: "{{ es_data_dir }}"
+es_path_logs: "{{ es_log_dir }}"
+
+## dpj ##
+#es_install_with_local_tarbal: False
+#es_install_tarball_full_path: "elasticsearch-2.4.1.tar.gz"
+
+## xenial only ##
+es_systemd_template_file: "elasticsearch.service.systemd.tpl"
+es_jvm_options_template_file: "jvm_options.tpl"
+es_environment_filename: "{{ es_service_name }}"
+es_jvm_options_file: "jvm.options"
+es_service_systemd_filename: "{{ es_service_name }}"
+
+
+## for compatibility if old playbook use old var naming  for http port ##
+es_http_custom_port: "{{ es_http_port }}"

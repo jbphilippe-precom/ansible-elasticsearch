@@ -1,0 +1,36 @@
+---
+
+- name: "Install ElasticSearch"
+  become: yes
+  apt:
+    name="elasticsearch={{ es_version }}"
+    state=present
+    update_cache=true
+
+- name: "Create log dir"
+  become: yes
+  file:
+    path={{ es_log_dir }}
+    state=directory
+    mode=0755
+    owner={{ es_username }}
+    group={{ es_groupname }}
+  notify: "restart es"
+
+- name: "Create data dir"
+  become: yes
+  file:
+    path={{ es_data_dir }}
+    state=directory
+    mode=0755
+    owner={{ es_username }}
+    group={{ es_groupname }}
+  notify: "restart es"
+
+#- name: "chown ElasticSearch on data directory"
+#  become: yes
+#  file:
+#    path={{ es_data_dir }}
+#    owner={{ es_username }}
+#    group={{ es_groupname }}
+#  notify: "restart es"

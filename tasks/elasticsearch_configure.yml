@@ -1,0 +1,108 @@
+---
+# tasks file for ansible-elasticsearch-2.0-configure
+- name: "Set Production interface Fact"
+  set_fact: es_prod_interface_name="ansible_{{ es_prod_interface }}"
+
+- name: "create config directory for elasticsearch"
+  become: yes
+  file:
+    path="{{ es_conf_dir }}"
+    state=directory
+    mode=0750
+    owner=root
+    group="{{ es_groupname }}"
+
+- name: "create log directory for elasticsearch"
+  become: yes
+  file:
+    path="{{ es_log_dir }}"
+    state=directory
+    mode=0755
+    owner="{{ es_username }}"
+    group="{{ es_groupname }}"
+
+- name: "create PID directory for elasticsearch"
+  become: yes
+  file:
+    path="{{ es_pid_dir }}"
+    state=directory
+    mode=0755
+    owner="{{ es_username }}"
+    group="{{ es_groupname }}"
+
+- name: "Create tmpfs file for non standard installation"
+  become: yes
+  copy:
+    src="/usr/lib/tmpfiles.d/elasticsearch.conf"
+    dest="/etc/tmpfiles.d/{{ es_service_name }}.conf"
+    remote_src=True
+  when: es_service_name != "elasticsearch" and ansible_distribution_release == 'xenial'
+
+- name: "Configure tmpfs file for non standard installaton"
+  become: yes
+  replace:
+    dest: "/etc/tmpfiles.d/{{ es_service_name }}.conf"
+    regexp: "/var/run/elasticsearch"
+    replace: "{{ es_pid_dir }}"
+  when: es_service_name != "elasticsearch" and ansible_distribution_release == 'xenial'
+
+- name: "create script directory for elasticsearch"
+  become: yes
+  file:
+    path="{{ es_conf_dir }}/scripts"
+    state=directory
+    mode=0750
+    owner=root
+    group="{{ es_groupname }}"
+
+- name: Upload elasticsearch.yml
+  become: yes
+  template:
+    src="{{ es_config_template_file }}"
+    dest="{{ es_conf_dir }}/{{ es_config_file }}"
+  notify: "restart es"
+
+- name: Upload default elasticsearch file
+  become: yes
+  template:
+    src="{{ es_default_config_template_file }}"
+    dest="/etc/default/{{ es_environment_filename }}"
+  notify: "restart es"
+
+# Only for ES > 5.X
+- name: Upload jvm options file
+  become: yes
+  template:
+    src="{{ es_jvm_options_template_file }}"
+    dest="{{ es_conf_dir }}/{{ es_jvm_options_file }}"
+  when: es_version|version_compare("5.0.0",'>=')
+  notify: "restart es"
+
+#Only for ES < 5.X
+- name: Upload logging.yml
+  become: yes
+  template:
+    src="{{ es_logging_template_file }}"
+    dest="{{ es_conf_dir }}/logging.yml"
+  when: es_version|version_compare("5.0.0",'<')
+  notify: "restart es"
+
+- name: Upload systemd
+  become: yes
+  template:
+    src="{{ es_systemd_template_file }}"
+    dest="/etc/systemd/system/{{ es_service_systemd_filename }}.service"
+  when: ansible_distribution_release == 'xenial'
+  notify: "restart es"
+
+- name: Systemctl daemon-reload
+  become: yes
+  shell: "systemctl daemon-reload"
+  when: ansible_distribution_release == 'xenial'
+
+- name: start ElasticSearch
+  become: yes
+  service:
+    name="{{ es_service_name }}"
+    state=started
+    enabled=yes

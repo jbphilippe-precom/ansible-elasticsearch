@@ -1,0 +1,3 @@
+---
+# vars file for ansible-elasticsearch
+es_config_file: "elasticsearch.yml"

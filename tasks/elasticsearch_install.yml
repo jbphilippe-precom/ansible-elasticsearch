@@ -1,0 +1,14 @@
+---
+- include: elasticsearch_set_repository.yml
+
+- include: elasticsearch_configure_lv.yml
+  when: es_lv_create
+
+- include: elasticsearch_install_package.yml
+
+- include: elasticsearch_configure.yml
+
+- include: elasticsearch_security.yml
+  when: es_firewall
+
+- include: elasticsearch_system_optimization.yml

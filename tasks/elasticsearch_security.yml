@@ -1,0 +1,108 @@
+---
+# tasks file for ansible-elasticsearch-2.0-security
+
+- name: "Install Ufw"
+  become: yes
+  apt:
+    name="ufw"
+    state=present
+    update_cache=true
+
+- name: "Allow everything and enable UFW"
+  become: yes
+  ufw:
+    state=enabled
+    policy=allow
+  register: resultufw
+  until: resultufw|succeeded
+  retries: 10
+  delay : 5
+
+- name: "Set logging"
+  become: yes
+  ufw: logging=on
+
+- name: "Allow OpenSSH"
+  become: yes
+  ufw:
+    rule=allow
+    name=OpenSSH
+  register: resultufw
+  until: resultufw|succeeded
+  retries: 10
+  delay : 5
+
+- name: "Allow 127.0.0.1 on http port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_http_port }}
+    src=127.0.0.1
+  register: resultufw
+  until: resultufw|succeeded
+  retries: 10
+  delay : 5
+
+- name: "Allow 127.0.0.1 on transport port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_transport_tcp_port }}
+    src=127.0.0.1
+  register: resultufw
+  until: resultufw|succeeded
+  retries: 10
+  delay : 5
+
+- name: "Set Production interface Fact"
+  set_fact: es_prod_interface_name="ansible_{{ es_prod_interface }}"
+
+- name: "Allow nodes on http port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_http_port }}
+    src="{{ hostvars[item][es_prod_interface_name]['ipv4']['address'] }}"
+  with_items: "{{ groups[es_cluster_group] }}"
+
+- name: "Allow nodes on transport port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_transport_tcp_port }}
+    src="{{ hostvars[item][es_prod_interface_name]['ipv4']['address'] }}"
+  with_items: "{{ groups[es_cluster_group] }}"
+
+- name: "Allow client list on http port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_http_port }}
+    src="{{ item }}"
+  with_items: "{{ es_allowed_client_list_ip }}"
+
+- name: "Allow client list on transport port"
+  become: yes
+  ufw:
+    rule=allow
+    proto=tcp
+    port={{ es_transport_tcp_port }}
+    src="{{ item }}"
+  with_items: "{{ es_allowed_client_list_ip }}"
+
+- name: "Deny all access to port http port"
+  become: yes
+  ufw:
+    rule=reject
+    port={{ es_http_port }}
+
+- name: "Deny all access to port transport port"
+  become: yes
+  ufw:
+    rule=reject
+    port={{ es_transport_tcp_port }}
