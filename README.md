@@ -1,4 +1,4 @@
-[![build status](https://gitrep.services.local/ansible-middlewares/ansible-elasticsearch/badges/develop/build.svg)](https://gitrep.services.local/ansible-middlewares/ansible-elasticsearch/commits/develop)
+
 Role Name
 =========
 
@@ -309,7 +309,7 @@ TEST
 License
 -------
 
-BSD
+D
 
 TODO
 -------
